@@ -14,6 +14,9 @@ Docker Compose starts **three services**: PostgreSQL, the Node.js API server, an
 # First run — builds the server image, seeds demo data, and starts everything.
 # Note: ollama-init pulls llama3 (~4.7 GB) on first run. Subsequent starts are instant.
 SEED_DB=true docker compose up --build
+
+# If windows run the following: 
+$env:SEED_DB="true"; docker compose up --build
 ```
 
 Wait for output like `▶ Starting server on port 5000` and `ollama-init exited with code 0` before testing the assistant.
