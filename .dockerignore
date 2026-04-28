@@ -1,0 +1,19 @@
+.git/
+*.log
+*.md
+
+# Reinstalled inside the image
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Rebuilt inside the image
+server/dist/
+
+# Only package.json stub is needed from client (for npm workspace resolution)
+client/
+!client/package.json
+
+# Never bake secrets into the image
+.env
+server/.env

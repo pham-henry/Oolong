@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  owner
+  worker
+}
+
+enum AdjustmentType {
+  manual
+  waste
+  sale
+}
+
+enum RecommendationStatus {
+  pending
+  approved
+  dismissed
+  completed
+  resolved
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  auditLogs            AuditLog[]
+  dailySales           DailySales[]
+  inventoryAdjustments InventoryAdjustment[]
+
+  // Reorder workflow back-relations
+  approvedRecommendations  ReorderRecommendation[] @relation("ApprovedRecommendations")
+  dismissedRecommendations ReorderRecommendation[] @relation("DismissedRecommendations")
+  completedRecommendations ReorderRecommendation[] @relation("CompletedRecommendations")
+}
+
+model InventoryItem {
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  currentQuantity  Float    @default(0)
+  reorderThreshold Float    @default(10)
+  safetyStock      Float    @default(5)
+  unit             String   @default("units")
+  updatedAt        DateTime @updatedAt
+
+  recipeIngredients      RecipeIngredient[]
+  inventoryAdjustments   InventoryAdjustment[]
+  reorderRecommendations ReorderRecommendation[]
+}
+
+model Recipe {
+  id        Int    @id @default(autoincrement())
+  drinkName String @unique
+
+  ingredients     RecipeIngredient[]
+  dailySalesItems DailySalesItem[]
+}
+
+model RecipeIngredient {
+  id              Int   @id @default(autoincrement())
+  recipeId        Int
+  inventoryItemId Int
+  quantity        Float
+
+  recipe        Recipe        @relation(fields: [recipeId], references: [id])
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@unique([recipeId, inventoryItemId])
+}
+
+model DailySales {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  userId    Int
+
+  submittedBy User           @relation(fields: [userId], references: [id])
+  items       DailySalesItem[]
+}
+
+model DailySalesItem {
+  id           Int @id @default(autoincrement())
+  dailySalesId Int
+  recipeId     Int
+  quantity     Int
+
+  dailySales DailySales @relation(fields: [dailySalesId], references: [id])
+  recipe     Recipe     @relation(fields: [recipeId], references: [id])
+}
+
+model InventoryAdjustment {
+  id              Int            @id @default(autoincrement())
+  inventoryItemId Int
+  userId          Int
+  delta           Float
+  reason          String
+  type            AdjustmentType
+  createdAt       DateTime       @default(now())
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  adjustedBy    User          @relation(fields: [userId], references: [id])
+}
+
+model ReorderRecommendation {
+  id              Int                  @id @default(autoincrement())
+  inventoryItemId Int                  @unique
+  avgDailyUsage   Float
+  daysRemaining   Float
+  reorderNeeded   Boolean
+  recommendedQty  Float
+  isOverstock     Boolean              @default(false)
+
+  // Owner workflow
+  status          RecommendationStatus @default(pending)
+  reason          String?              // human-readable explanation
+  // snapshot of inventory state at the time the recommendation was generated
+  currentQtySnapshot       Float?
+  reorderThresholdSnapshot Float?
+  safetyStockSnapshot      Float?
+  // workflow audit trail
+  approvedById   Int?
+  approvedAt     DateTime?
+  dismissedById  Int?
+  dismissedAt    DateTime?
+  completedById  Int?
+  completedAt    DateTime?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  inventoryItem InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  approvedBy    User?         @relation("ApprovedRecommendations",  fields: [approvedById],  references: [id])
+  dismissedBy   User?         @relation("DismissedRecommendations", fields: [dismissedById], references: [id])
+  completedBy   User?         @relation("CompletedRecommendations", fields: [completedById], references: [id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

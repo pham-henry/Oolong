@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: oolong
+      POSTGRES_PASSWORD: oolong_pass
+      POSTGRES_DB: oolong
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oolong"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: postgresql://oolong:oolong_pass@postgres:5432/oolong
+      JWT_SECRET: ${JWT_SECRET:-changeme-set-a-real-secret-in-production}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      NODE_ENV: production
+      PORT: 5000
+      # Set SEED_DB=true on first run to populate sample data:
+      #   SEED_DB=true docker compose up
+      SEED_DB: ${SEED_DB:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

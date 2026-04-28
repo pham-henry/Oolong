@@ -1,0 +1,30 @@
+{
+  "name": "oolong",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c cyan,green \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "db:migrate": "npm run db:migrate --workspace=server",
+    "db:seed": "npm run db:seed --workspace=server",
+    "db:generate": "npm run db:generate --workspace=server",
+    "db:reset": "npm run db:reset --workspace=server",
+    "lint": "npm run lint --workspace=server && npm run lint --workspace=client",
+    "typecheck": "npm run typecheck --workspace=server && npm run typecheck --workspace=client"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+   "prisma": {
+      "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  }
+}
