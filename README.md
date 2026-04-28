@@ -4,15 +4,22 @@ A secure, web-based inventory management system for a boba/drink shop. Built for
 
 ## Quick Start
 
-### Option A — Docker (backend + database)
+### Option A — Docker (recommended for demo)
 
 Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-```bash
-# First run: build image, start postgres, seed sample data
-SEED_DB=true docker compose up --build
+Docker Compose starts **three services**: PostgreSQL, the Node.js API server, and Ollama (local LLM for the Smart Assistant). The assistant falls back to rule-based answers if Ollama is still loading, so the app is functional immediately.
 
-# Subsequent runs (data already in volume)
+```bash
+# First run — builds the server image, seeds demo data, and starts everything.
+# Note: ollama-init pulls llama3 (~4.7 GB) on first run. Subsequent starts are instant.
+SEED_DB=true docker compose up --build
+```
+
+Wait for output like `▶ Starting server on port 5000` and `ollama-init exited with code 0` before testing the assistant.
+
+```bash
+# Subsequent runs (images built, data and model cached in volumes)
 docker compose up
 ```
 
@@ -38,7 +45,7 @@ cp .env.example server/.env
 # 3. Create tables
 npm run db:migrate
 
-# 4. Seed sample data
+# 4. Seed demo data
 npm run db:seed
 
 # 5. Start both servers
@@ -48,17 +55,17 @@ npm run dev
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
-### Smart Assistant (Ollama)
+### Smart Assistant (Ollama — local only)
 
-The Smart Assistant runs against a **local LLM via [Ollama](https://ollama.com)**. Without it the assistant page still works — it returns a rule-based answer grounded in live DB data instead.
-
-To enable the full LLM experience:
+When running locally (Option B), Ollama must be started separately:
 
 ```bash
 # Install Ollama: https://ollama.com/download
-ollama pull llama3
-ollama serve   # starts on http://localhost:11434 by default
+ollama pull llama3   # one-time download, ~4.7 GB
+ollama serve         # starts on http://localhost:11434
 ```
+
+When running via Docker (Option A), Ollama is included as a service and `llama3` is pulled automatically on first start. No extra steps needed.
 
 The model and URL are configurable via env vars (see [Environment Variables](#environment-variables) below).
 

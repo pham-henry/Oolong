@@ -31,6 +31,9 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Prisma requires OpenSSL at runtime; Alpine doesn't include it by default
+RUN apk add --no-cache openssl
+
 # Runtime: hoisted node_modules (includes @prisma/client, prisma CLI, ts-node for seed)
 COPY --from=builder /app/node_modules ./node_modules
 

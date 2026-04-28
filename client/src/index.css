@@ -8,6 +8,14 @@
   --latte:    #c4a882;
   --espresso: #2a1a0e;
 
+  /* Taro — dusty lavender-purple, the cool counterpoint to the warm earth tones.
+     Named after taro milk tea, an Oolong shop staple. Used for active states,
+     focus rings, and accent badges. */
+  --taro:       #a897c0;   /* on dark (bark) surfaces   */
+  --taro-mid:   #7d6e9a;   /* on light surfaces          */
+  --taro-bg:    #f0ecf7;   /* badge / highlight wash     */
+  --taro-glow:  rgba(168,151,192,0.18);
+
   /* App surface colours */
   --bg:        #f5ede1;       /* warm page background */
   --surface:   #faf7f2;       /* cards */
@@ -115,8 +123,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 .nav-link.active {
-  background: rgba(196,168,130,0.18);
-  color: var(--latte);
+  background: var(--taro-glow);
+  color: var(--taro);
+  border-left: 2px solid var(--taro);
+  padding-left: 10px;
 }
 
 .sidebar-footer {
@@ -272,6 +282,7 @@ tr:hover td { background: var(--surface-2); }
 .badge-success { background: var(--success-bg); color: var(--success); }
 .badge-neutral { background: #ede8df; color: #7a5c40; }
 .badge-primary { background: rgba(196,168,130,0.18); color: #7a4c24; }
+.badge-taro    { background: var(--taro-bg); color: var(--taro-mid); }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
 .btn {
@@ -345,8 +356,8 @@ textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: rgba(196,168,130,0.6);
-  box-shadow: 0 0 0 3px rgba(196,168,130,0.12);
+  border-color: var(--taro-mid);
+  box-shadow: 0 0 0 3px var(--taro-glow);
 }
 
 textarea { resize: vertical; min-height: 80px; }
@@ -463,8 +474,8 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 .login-form-panel input:focus {
-  border-color: rgba(196,168,130,0.55) !important;
-  box-shadow: 0 0 0 3px rgba(196,168,130,0.1);
+  border-color: rgba(168,151,192,0.7) !important;
+  box-shadow: 0 0 0 3px rgba(168,151,192,0.15);
   outline: none;
 }
 
@@ -521,8 +532,8 @@ textarea { resize: vertical; min-height: 80px; }
 
 .chat-bubble.user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #c4a882, #a07858);
-  color: var(--espresso);
+  background: linear-gradient(135deg, var(--taro), var(--taro-mid));
+  color: #fff;
   border-bottom-right-radius: 4px;
   font-weight: 700;
 }
